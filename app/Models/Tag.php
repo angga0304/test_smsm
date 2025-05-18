@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use App\Models\Activity;
 
 class Tag extends Model
 {
@@ -28,6 +29,22 @@ class Tag extends Model
 
     public function posts() {
         return $this->hasMany(Post::class, 'tag_id');
+    }
+
+    public function getActivitiesAttribute() {
+        $activities = Activity::where('model', 'tag')
+            ->where('uuid', $this->id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($data) {
+                return (object)[
+                    'time' => $data->created_at->format('Y/m/d H:i:s'),
+                    'action' => $data->action,
+                    'user' => $data->author,
+                    'note' => $data->notes,
+                ];
+            });
+        return $activities;
     }
 
     public static function boot() {

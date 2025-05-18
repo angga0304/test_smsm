@@ -8,6 +8,15 @@ use Illuminate\Support\Facades\Route;
 Breadcrumbs::for('admin.dashboard', function (BreadcrumbTrail $trail) {
     $trail->push('Dashboard', route('admin.dashboard'));
 });
+Breadcrumbs::for('admin.tag.export', function (BreadcrumbTrail $trail) {
+    $trail->push('Dashboard', route('admin.dashboard'));
+});
+Breadcrumbs::for('admin.posts.export', function (BreadcrumbTrail $trail) {
+    $trail->push('Dashboard', route('admin.dashboard'));
+});
+Breadcrumbs::for('admin.files.export', function (BreadcrumbTrail $trail) {
+    $trail->push('Dashboard', route('admin.dashboard'));
+});
 
 Breadcrumbs::macro('resource', function (string $name, string $title, ?string $parentName = null) {
     if ($parentName) {

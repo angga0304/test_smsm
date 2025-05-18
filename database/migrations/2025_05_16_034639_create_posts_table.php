@@ -17,6 +17,7 @@ return new class extends Migration
             $table->boolean('active');
             $table->string('title');
             $table->text('body');
+            $table->json('story');
             $table->unsignedBigInteger('user_id');
             $table->softDeletes();
             $table->timestamps();

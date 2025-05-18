@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PostExport;
 use App\Models\Post;
 use App\Models\Tag;
 use App\Models\File;
+use App\Models\Activity;
 use App\Http\Requests\StorePostRequest;
 use App\Http\Requests\UpdatePostRequest;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use Buglinjo\LaravelWebp\Facades\Webp;
+use Maatwebsite\Excel\Facades\Excel;
+use Carbon\Carbon;
 
 class PostController extends Controller
 {
@@ -46,6 +49,7 @@ class PostController extends Controller
     public function store(StorePostRequest $request)
     {
         $param = $request->all();
+        $param['story'] = json_encode(preg_split('/\r\n|\r|\n/', $param['story']));
         $param['user_id'] = Auth::id();
         $param['active'] = $param['active']?? FALSE;
 
@@ -61,7 +65,8 @@ class PostController extends Controller
 
         $param['file_id'] = $fid->id;
 
-        Post::create($param);
+        $post = Post::create($param);
+        $this->audit($post, 'Create');
 
         return redirect()->route('admin.posts.index')->with('message', 'Post has been created');
     }
@@ -79,7 +84,16 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        if ($post->activities->count() > 0) {
+            $post->activities = $post->activities;
+        }
+        $post->story = implode(PHP_EOL, json_decode($post->story));
         $post->asset = $post->file->original_name;
+        $post->comments = $post->listcomment->map(function ($comment) {
+            $comment->author = $comment->user->name;
+            $comment->timeline = $comment->created_at->diffForHumans(Carbon::now());
+            return $comment;
+        })->toArray();
         $tags = Tag::all()->map(function($data) {
             return [
                 'id' => $data->id,
@@ -95,6 +109,7 @@ class PostController extends Controller
     public function update(UpdatePostRequest $request, Post $post)
     {
         $param = $request->all();
+        $param['story'] = json_encode(preg_split('/\r\n|\r|\n/', $param['story']));
         $param['active'] = $param['active']?? FALSE;
         $param['file_id'] = $param['file_id']?? $post->file_id;
         if(!empty($request->file_id)) {
@@ -112,6 +127,7 @@ class PostController extends Controller
         }
 
         $post->update($param);
+        $this->audit($post, 'Edit');
 
         return redirect()->route('admin.posts.index')->with('message', 'Post has been updated');
     }
@@ -124,8 +140,31 @@ class PostController extends Controller
         foreach($post->comments as $comment) {
             $comment->replies()->delete();
         }
+        $this->audit($post, 'Delete');
         $post->comments()->delete();
         $post->delete();
         return redirect()->route('admin.posts.index')->with('message', 'Post has been deleted');
+    }
+
+    /**
+     * Save history activity.
+     */
+    public function audit(Post $post, String $action)
+    {
+        Activity::create([
+            'user_id' => Auth::id(),
+            'uuid' => $post->id,
+            'model' => 'post',
+            'action' => $action,
+            'notes' => "$action Post",
+        ]);
+    }
+
+    /**
+    * @return \Illuminate\Support\Collection
+    */
+    public function export() 
+    {
+        return Excel::download(new PostExport, 'post_'. time() .'.xlsx');
     }
 }

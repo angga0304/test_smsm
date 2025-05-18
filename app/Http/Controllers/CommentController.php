@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Http\Requests\StoreCommentRequest;
 use App\Http\Requests\UpdateCommentRequest;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Activity;
 
 class CommentController extends Controller
 {
@@ -68,10 +69,23 @@ class CommentController extends Controller
     public function destroy(Comment $comment)
     {
         $post = $comment->post->slug;
-        if($comment->replies->count() > 0) {
-            $comment->replies()->delete();
-        }
-        $comment->delete();
-        return redirect()->route('post.detail', $post);
+        $comment->blocked = !$comment->blocked;
+        $comment->save();
+        $this->audit($comment->post, 'Moderate');
+        return redirect()->back();
+    }
+
+    /**
+     * Save history activity.
+     */
+    public function audit(Post $post, String $action)
+    {
+        Activity::create([
+            'user_id' => Auth::id(),
+            'uuid' => $post->id,
+            'model' => 'post',
+            'action' => $action,
+            'notes' => "Moderate comment",
+        ]);
     }
 }

@@ -2,6 +2,7 @@
 import { Head } from '@inertiajs/vue3'
 import {
   mdiChartTimelineVariant,
+  mdiClockTimeEight
 } from '@mdi/js'
 import SectionMain from '@/Components/SectionMain.vue'
 import LayoutAuthenticated from '@/Layouts/Admin/LayoutAuthenticated.vue'
@@ -41,7 +42,7 @@ const submit = () => {
     <SectionMain>
       <SectionTitleLineWithButton
         :icon="mdiChartTimelineVariant"
-        title="Create Tag"
+        title="Update Tag"
         main
       >
       </SectionTitleLineWithButton>
@@ -77,7 +78,36 @@ const submit = () => {
                 </div>
             </div>
         </div>
-    </div>
+        
+        <div v-if="props.tag.activities" class="py-12">
+          <SectionTitleLineWithButton
+            :icon="mdiClockTimeEight"
+            title="History & Note"
+            main
+          >
+          </SectionTitleLineWithButton>
+          <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                  <table>
+                    <thead>
+                      <td>Date</td>
+                      <td>Action</td>
+                      <td>user</td>
+                      <td>Note</td>
+                    </thead>
+                    <tr v-for="log in props.tag.activities">
+                      <td>{{ log.time }}</td>
+                      <td>{{ log.action }}</td>
+                      <td>{{ log.user }}</td>
+                      <td>{{ log.note }}</td>
+                    </tr>
+                  </table>
+                </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </SectionMain>
   </LayoutAuthenticated>
 </template>

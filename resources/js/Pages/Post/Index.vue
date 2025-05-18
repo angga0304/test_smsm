@@ -82,6 +82,7 @@ const editPost = (id) => {
                             </div>
                         </div>
                         <Link href="posts/create"><button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-3">Create New Post</button></Link>
+                        <a target="_blank" href="posts/export"><button class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded my-3 float-right">Export Tag</button></a>
                         <div class="p-6 text-gray-900">
                         <DataTable
                             :data="posts"
@@ -97,7 +98,7 @@ const editPost = (id) => {
                             </thead>
                             <template #column-3="props">
                                 <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded ml-2" @click="editPost(props.rowData.id)">Edit</button>
-                                <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2" @click="deletePost(props.rowData.id)">Show</button>
+                                <button class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2" @click="deletePost(props.rowData.id)">Delete</button>
                             </template>
                         </DataTable>
                     </div>

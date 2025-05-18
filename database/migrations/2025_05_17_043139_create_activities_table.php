@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('comment', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+        Schema::create('activities', function (Blueprint $table) {
+            $table->id();
             $table->unsignedBigInteger('user_id');
-            $table->text('body');
-            $table->boolean('blocked')->nullable()->default(FALSE);
-            $table->softDeletes();
-            $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users');
-            $table->foreignUuid('post_id')->references('id')->on('posts');
+            $table->string('uuid');
+            $table->string('model');
+            $table->string('notes');
+            $table->string('action');
+            $table->timestamps();
         });
     }
 
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('comment');
+        Schema::dropIfExists('activities');
     }
 };

@@ -24,8 +24,8 @@ class UpdatePostRequest extends FormRequest
         return [
             'title' => 'required',
             'body' => 'required',
+            'story' => 'required',
             'tag_id' => 'required',
-            // 'file_id' => 'mimes:pdf|max:2048'
         ];
     }
 }

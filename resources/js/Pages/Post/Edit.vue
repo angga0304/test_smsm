@@ -3,6 +3,7 @@ import { Head } from '@inertiajs/vue3'
 import {
   mdiChartTimelineVariant,
   mdiFile,
+  mdiClockTimeEight,
 } from '@mdi/js'
 import SectionMain from '@/Components/SectionMain.vue'
 import LayoutAuthenticated from '@/Layouts/Admin/LayoutAuthenticated.vue'
@@ -28,6 +29,7 @@ const fileErrorMsg = ref("");
 const form = useForm({
   title: props.post.title,
   body: props.post.body,
+  story: props.post.story,
   tag_id: props.post.tag_id,
   active: props.post.active == 1,
   file_id: null,
@@ -72,6 +74,12 @@ const submit = () => {
     }
   });
 };
+
+const deleteComment = (id) => {
+    if(confirm("Are you sure?")){
+        form.delete(`/admin/comment/${id}`);
+    }
+};
 </script>
 
 <template>
@@ -111,15 +119,25 @@ const submit = () => {
                             <label 
                                 for="body" 
                                 class="block text-gray-700 text-sm font-bold mb-2">
-                                Body:</label>
+                                Synopsis:</label>
                             <textarea 
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="body" 
                                 v-model="form.body" 
-                                placeholder="Enter Body"></textarea>
+                                placeholder="Enter Synopsis"></textarea>
                             <span v-if="showerrors.body" class="error text-red-800"> This field required</span>
                         </div>
 
-                        
+                        <div class="mb-4">
+                            <label 
+                                for="body" 
+                                class="block text-gray-700 text-sm font-bold mb-2">
+                                Body:</label>
+                            <textarea 
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="body" 
+                                v-model="form.story" 
+                                placeholder="Enter Body"></textarea>
+                            <span v-if="showerrors.story" class="error text-red-800"> This field required</span>
+                        </div>
 
                         <div class="mb-4">
                             <label 
@@ -163,6 +181,79 @@ const submit = () => {
 
                 </div>
             </div>
+        </div>
+
+        <div v-if="props.post.comments" class="py-12">
+          <SectionTitleLineWithButton
+            :icon="mdiClockTimeEight"
+            title="History & Note"
+            main
+          >
+          </SectionTitleLineWithButton>
+          <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                  <table>
+                    <thead>
+                      <td>Date</td>
+                      <td>user</td>
+                      <td>body</td>
+                      <td>status</td>
+                      <td>action</td>
+                    </thead>
+                    <tr v-for="comment in props.post.comments">
+                      <td>{{ comment.timeline }}</td>
+                      <td>{{ comment.author }}</td>
+                      <td>{{ comment.body }}</td>
+                      <td>{{ comment.blocked }}</td>
+                      <td>
+                        <button v-if="!comment.blocked"
+                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded ml-2" 
+                            @click="deleteComment(comment.id)"
+                        >
+                            Block
+                        </button>
+                        <button v-if="comment.blocked"
+                            class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded ml-2" 
+                            @click="deleteComment(comment.id)"
+                        >
+                            Unblock
+                        </button>
+                      </td>
+                    </tr>
+                  </table>
+                </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="props.post.activities" class="py-12">
+          <SectionTitleLineWithButton
+            :icon="mdiClockTimeEight"
+            title="History & Note"
+            main
+          >
+          </SectionTitleLineWithButton>
+          <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900">
+                  <table>
+                    <thead>
+                      <td>Date</td>
+                      <td>Action</td>
+                      <td>user</td>
+                      <td>Note</td>
+                    </thead>
+                    <tr v-for="log in props.post.activities">
+                      <td>{{ log.time }}</td>
+                      <td>{{ log.action }}</td>
+                      <td>{{ log.user }}</td>
+                      <td>{{ log.note }}</td>
+                    </tr>
+                  </table>
+                </div>
+            </div>
+          </div>
         </div>
     </div>
     </SectionMain>

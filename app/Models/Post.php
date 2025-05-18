@@ -32,6 +32,7 @@ class Post extends Model
         'tag_id',
         'active',
         'file_id',
+        'story',
     ];
 
     public function tag() {
@@ -47,7 +48,11 @@ class Post extends Model
     }
 
     public function getListcommentAttribute() {
-        return $this->comments()->whereNull('comment_id')->get();
+        return $this->comments()->orderByDesc('created_at')->get();
+    }
+
+    public function getListcommentfrontAttribute() {
+        return $this->comments()->where('blocked', FALSE)->orderByDesc('created_at')->get();
     }
 
     public function getStatusAttribute() {
@@ -59,7 +64,7 @@ class Post extends Model
     }
 
     public function getAssetAttribute() {
-        return '<a download href="'. asset($this->file->generated_name) .'">' . $this->file->original_name . '</a>';
+        return '<a download="' . $this->file->original_name . '" href="'. asset($this->file->generated_name) .'">' . $this->file->original_name . '</a>';
     }
 
     public function file() {
@@ -68,6 +73,22 @@ class Post extends Model
 
     public function getActionAttribute() {
         return '<a href="/admin/posts' . $this->id . '/edit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Edit</a>';
+    }
+
+    public function getActivitiesAttribute() {
+        $activities = Activity::where('model', 'post')
+            ->where('uuid', $this->id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($data) {
+                return (object)[
+                    'time' => $data->created_at->format('Y/m/d H:i:s'),
+                    'action' => $data->action,
+                    'user' => $data->author,
+                    'note' => $data->notes,
+                ];
+            });
+        return $activities;
     }
 
     /**

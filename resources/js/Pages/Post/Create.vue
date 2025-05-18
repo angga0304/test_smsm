@@ -26,6 +26,7 @@ const fileErrorMsg = ref("");
 const form = useForm({
   title: "",
   body: "",
+  story: "",
   tag_id: "",
   active: false,
   file_id: null,
@@ -36,6 +37,7 @@ const showerrors = reactive({
     'body': false,
     'tag_id': false,
     'file_id': false,
+    'story': false,
 });
 
 const onFileChange = () => {
@@ -61,6 +63,11 @@ const submit = () => {
             showerrors.tag_id = true;
         } else {
             showerrors.tag_id = false;
+        }
+        if(errors.story) {
+            showerrors.story = true;
+        } else {
+            showerrors.story = false;
         }
         if(errors.file_id) {
             showerrors.file = true;
@@ -110,12 +117,24 @@ const submit = () => {
                             <label 
                                 for="body" 
                                 class="block text-gray-700 text-sm font-bold mb-2">
-                                Body:</label>
+                                Synopsis:</label>
                             <textarea 
                                 class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="body" 
                                 v-model="form.body" 
                                 placeholder="Enter Body"></textarea>
                             <span v-if="showerrors.body" class="error text-red-800"> This field required</span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label 
+                                for="body" 
+                                class="block text-gray-700 text-sm font-bold mb-2">
+                                Body:</label>
+                            <textarea 
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="body" 
+                                v-model="form.story" 
+                                placeholder="Enter Body"></textarea>
+                            <span v-if="showerrors.story" class="error text-red-800"> This field required</span>
                         </div>
 
                         

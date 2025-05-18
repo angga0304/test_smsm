@@ -36,6 +36,22 @@ class File extends Model
         return $this->original_name;
     }
 
+    public function getActivitiesAttribute() {
+        $activities = Activity::where('model', 'file')
+            ->where('uuid', $this->id)
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($data) {
+                return (object)[
+                    'time' => $data->created_at->format('Y/m/d H:i:s'),
+                    'action' => $data->notes,
+                    'user' => $data->author,
+                    'note' => $data->notes,
+                ];
+            });
+        return $activities;
+    }
+
     public static function boot() {
         parent::boot();
 

@@ -6,6 +6,10 @@ use App\Models\File;
 use App\Http\Requests\StoreFileRequest;
 use App\Http\Requests\UpdateFileRequest;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Activity;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\FileExport;
 
 class FileController extends Controller
 {
@@ -91,5 +95,27 @@ class FileController extends Controller
     {
         $file->delete();
         return redirect()->route('admin.files.index')->with('message', 'File has been deleted');
+    }
+
+    /**
+     * Save history activity.
+     */
+    public function audit(File $file, String $action)
+    {
+        Activity::create([
+            'user_id' => Auth::id(),
+            'uuid' => $file->id,
+            'model' => 'file',
+            'action' => $action,
+            'notes' => "$action File",
+        ]);
+    }
+
+    /**
+    * @return \Illuminate\Support\Collection
+    */
+    public function export() 
+    {
+        return Excel::download(new FileExport, 'file_'. time() .'.xlsx');
     }
 }
