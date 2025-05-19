@@ -31,7 +31,7 @@ const submit = () => {
 
 <template>
   <LayoutAuthenticated>
-    <Head title="Dashboard" />
+    <Head title="Create Tag" />
     <SectionMain>
       <SectionTitleLineWithButton
         :icon="mdiChartTimelineVariant"

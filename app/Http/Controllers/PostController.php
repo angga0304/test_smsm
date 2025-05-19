@@ -13,20 +13,28 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use App\Jobs\ProcessExport;
 
 class PostController extends Controller
 {
+    public $tag, $post;
+
+    public function __construct(Tag $tag, Post $post)
+    {
+        $this->tag = new Tag;
+        $this->post = new Post;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $posts = Post::all()->map(function ($data) {
-            $data->status = $data->status;
-            $data->author = $data->user->name;
-            return $data;
-        });
-        return Inertia::render('Post/Index', ['posts' => $posts]);
+        $posts = $this->post->getIndexData();
+        return Inertia::render('Post/Index', [
+            'posts' => $posts,
+            'can' => Auth::user()->can('post moderate')
+        ]);
     }
 
     /**
@@ -34,12 +42,12 @@ class PostController extends Controller
      */
     public function create()
     {
-        $tags = Tag::all()->map(function($data) {
-            return [
-                'id' => $data->id,
-                'label' => $data->name,
-            ];
-        });
+        if(!Auth::user()->can('post moderate')) {
+            return response()->json([
+                'message' => 'Record not found.'
+            ], 404);
+        }
+        $tags = $this->tag->getOptionData();
         return Inertia::render('Post/Create', ['tags' => $tags]);
     }
 
@@ -84,22 +92,18 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
+        if(!Auth::user()->can('post moderate')) {
+            return response()->json([
+                'message' => 'Record not found.'
+            ], 404);
+        }
         if ($post->activities->count() > 0) {
             $post->activities = $post->activities;
         }
         $post->story = implode(PHP_EOL, json_decode($post->story));
         $post->asset = $post->file->original_name;
-        $post->comments = $post->listcomment->map(function ($comment) {
-            $comment->author = $comment->user->name;
-            $comment->timeline = $comment->created_at->diffForHumans(Carbon::now());
-            return $comment;
-        })->toArray();
-        $tags = Tag::all()->map(function($data) {
-            return [
-                'id' => $data->id,
-                'label' => $data->name,
-            ];
-        });
+        $post->comments = $post->getListcomments();
+        $tags = $this->tag->getOptionData();
         return Inertia::render('Post/Edit', ['tags' => $tags, 'post' => $post]);
     }
 
@@ -165,6 +169,12 @@ class PostController extends Controller
     */
     public function export() 
     {
-        return Excel::download(new PostExport, 'post_'. time() .'.xlsx');
+        // return Excel::download(new PostExport, 'post.xlsx');
+        $data = [
+            'user' => Auth::id(),
+            'type' => 'post'
+        ];
+        dispatch(new ProcessExport($data));
+        return redirect()->route('admin.files.index')->with('message', 'Your excel been queue look in file tab');
     }
 }

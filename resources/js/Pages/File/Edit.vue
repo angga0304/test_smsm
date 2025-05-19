@@ -1,7 +1,7 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import {
-  mdiChartTimelineVariant,
+  mdiDatabaseEdit,
   mdiFile,
 } from '@mdi/js'
 import SectionMain from '@/Components/SectionMain.vue'
@@ -34,11 +34,13 @@ const onFileChange = () => {
 };
 
 const submit = () => {
+  console.log(form.file_id);
   form.put(`/admin/files/${props.file.id}`, {
     onError: (errors) => {
+      console.log(errors);
         if(errors.file_id) {
-            showerrors.file = true;
-            fileErrorMsg.value = errors.file;
+            showerrors.file_id = true;
+            fileErrorMsg.value = errors.file_id;
         } else {
             showerrors.file = false;
         }
@@ -49,11 +51,11 @@ const submit = () => {
 
 <template>
   <LayoutAuthenticated>
-    <Head title="Dashboard" />
+    <Head title="File" />
     <SectionMain>
       <SectionTitleLineWithButton
-        :icon="mdiChartTimelineVariant"
-        title="Edit Post"
+        :icon="mdiDatabaseEdit"
+        title="File"
         main
       >
       </SectionTitleLineWithButton>
@@ -71,25 +73,45 @@ const submit = () => {
                                 class="mr-2"
                                 size="20"
                             />
-                            <div v-if="props.file.file_id != 0" v-html="props.file.original_name">
-                            </div>
-                            <label 
-                                for="body" 
-                                class="block text-gray-700 text-sm font-bold mb-2">
-                                File:</label>
-                                <input type="file" @change="onFileChange" ref="fileInput" /><br>
-                            <span v-if="showerrors.file" class="error text-red-800"> File must be pdf and below 300kb</span>
+                            <span v-if="props.file.file_id != 0" v-html="props.file.original_name">
+                            </span>
                         </div>
-
-                        <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-3 text-white">
-                            Submit
-                        </button>
+                        <span v-html="props.file.asset"></span>
 
                     </form>
 
                 </div>
             </div>
         </div>
+    </div>
+        
+    <div v-if="props.file.activities" class="py-12">
+      <SectionTitleLineWithButton
+        :icon="mdiClockTimeEight"
+        title="History & Note"
+        main
+      >
+      </SectionTitleLineWithButton>
+      <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="p-6 text-gray-900">
+              <table>
+                <thead>
+                  <td>Date</td>
+                  <td>Action</td>
+                  <td>user</td>
+                  <td>Note</td>
+                </thead>
+                <tr v-for="log in props.file.activities">
+                  <td>{{ log.time }}</td>
+                  <td>{{ log.action }}</td>
+                  <td>{{ log.user }}</td>
+                  <td>{{ log.note }}</td>
+                </tr>
+              </table>
+            </div>
+        </div>
+      </div>
     </div>
     </SectionMain>
   </LayoutAuthenticated>

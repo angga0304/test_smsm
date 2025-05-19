@@ -49,6 +49,12 @@ class AdminCoreSeeder extends Seeder
             'comment create',
             'comment edit',
             'comment delete',
+            'post list',
+            'post moderate',
+            'tag list',
+            'tag moderate',
+            'file list',
+            'file moderate',
         ];
 
         foreach ($permissions as $permission) {

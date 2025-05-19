@@ -8,8 +8,7 @@ use App\Http\Requests\StoreTagRequest;
 use App\Http\Requests\UpdateTagRequest;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\TagExports;
+use App\Jobs\ProcessExport;
 
 class TagController extends Controller
 {
@@ -19,7 +18,10 @@ class TagController extends Controller
     public function index()
     {
         $tags = Tag::all();
-        return Inertia::render('Tag/Index', ['tags' => $tags]);
+        return Inertia::render('Tag/Index', [
+            'tags' => $tags,
+            'can' => Auth::user()->can('tag moderate')
+        ]);
     }
 
     /**
@@ -27,6 +29,11 @@ class TagController extends Controller
      */
     public function create()
     {
+        if(!Auth::user()->can('tag moderate')) {
+            return response()->json([
+                'message' => 'Record not found.'
+            ], 404);
+        }
         return Inertia::render('Tag/Create');
     }
 
@@ -55,6 +62,11 @@ class TagController extends Controller
      */
     public function edit(Tag $tag)
     {
+        if(!Auth::user()->can('tag moderate')) {
+            return response()->json([
+                'message' => 'Record not found.'
+            ], 404);
+        }
         if ($tag->activities->count() > 0) {
             $tag->activities = $tag->activities;
         }
@@ -79,6 +91,9 @@ class TagController extends Controller
      */
     public function destroy(Tag $tag)
     {
+        if ($tag->posts->count() > 0) {
+            return redirect()->route('admin.tag.index')->with('message', 'Tag cant deleted used by post');
+        }
         $this->audit($tag, 'Delete');
         $tag->delete();
         return redirect()->route('admin.tag.index')->with('message', 'Tag has been deleted');
@@ -103,6 +118,11 @@ class TagController extends Controller
     */
     public function export() 
     {
-        return Excel::download(new TagExports, 'tag_'. time() .'.xlsx');
+        $data = [
+            'user' => Auth::id(),
+            'type' => 'tag'
+        ];
+        dispatch(new ProcessExport($data));
+        return redirect()->route('admin.files.index')->with('message', 'Your excel been queue look in file tab');
     }
 }

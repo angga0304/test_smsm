@@ -26,7 +26,8 @@ class StorePostRequest extends FormRequest
             'body' => 'required',
             'story' => 'required',
             'tag_id' => 'required',
-            'file_id' => 'required|mimes:pdf|min:200|max:500'
+            'publish' => 'required',
+            'file_id' => 'required|mimes:pdf|min:100|max:500'
         ];
     }
 }

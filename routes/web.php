@@ -13,7 +13,7 @@ use App\Http\Controllers\FileController;
 use App\Http\Controllers\HomeController;
 use App\Models\Post;
 
-Route::get('/', [HomeController::class, 'index']);
+Route::get('/', [HomeController::class, 'index'])->name('homepage');
 Route::get('/post/{slug}', [HomeController::class, 'detail'])->name('post.detail');
 
 Route::get('/dashboard', function () {

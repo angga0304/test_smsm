@@ -8,23 +8,27 @@ use App\Http\Requests\UpdateFileRequest;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Activity;
-use Maatwebsite\Excel\Facades\Excel;
-use App\Exports\FileExport;
+use App\Jobs\ProcessExport;
 
 class FileController extends Controller
 {
+    public $file;
+
+    public function __construct(File $file)
+    {
+        $this->file = new File;
+    }
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $files = File::all()->map(function ($data) {
-            $data->canDelete = $data->Post->count() < 1;
-            $data->used = $data->Post->count();
-            $data->asset = $data->asset;
-            return $data;
-        });
-        return Inertia::render('File/Index', ['files' => $files])->with('message', 'File has been created');
+        $files = $this->file->getIndexData();
+        return Inertia::render('File/Index', [
+            'files' => $files,
+            'can' => Auth::user()->can('file moderate')
+        ]);
     }
 
     /**
@@ -32,6 +36,11 @@ class FileController extends Controller
      */
     public function create()
     {
+        if(!Auth::user()->can('file moderate')) {
+            return response()->json([
+                'message' => 'Record not found.'
+            ], 404);
+        }
         return Inertia::render('File/Create');
     }
 
@@ -66,6 +75,15 @@ class FileController extends Controller
      */
     public function edit(File $file)
     {
+        if(!Auth::user()->can('file moderate')) {
+            return response()->json([
+                'message' => 'Record not found.'
+            ], 404);
+        }
+        if ($file->activities->count() > 0) {
+            $file->activities = $file->activities;
+        }
+        $file->asset = $file->asset;
         return Inertia::render('File/Edit', ['file' => $file]);
     }
 
@@ -116,6 +134,11 @@ class FileController extends Controller
     */
     public function export() 
     {
-        return Excel::download(new FileExport, 'file_'. time() .'.xlsx');
+        $data = [
+            'user' => Auth::id(),
+            'type' => 'file'
+        ];
+        dispatch(new ProcessExport($data));
+        return redirect()->route('admin.files.index')->with('message', 'Your excel been queue look in file tab');
     }
 }

@@ -13,6 +13,8 @@ use Cviebrock\EloquentSluggable\Sluggable;
 use Cviebrock\EloquentSluggable\SluggableScopeHelpers;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
+
 
 class Post extends Model
 {
@@ -33,6 +35,7 @@ class Post extends Model
         'active',
         'file_id',
         'story',
+        'publish',
     ];
 
     public function tag() {
@@ -45,6 +48,45 @@ class Post extends Model
 
     public function comments() {
         return $this->hasMany(Comment::class, 'post_id');
+    }
+
+    public function getIndexData() {
+        return $this->all()->map(function ($data) {
+            $data->status = $data->status;
+            $data->author = $data->user->name;
+            return $data;
+        });
+    }
+
+    public function getListFrontEnd() {
+        return $this->where('active', TRUE)->get()->sortByDesc('created_at')->map(function ($post) {
+            $post->author = $post->user->name;
+            $post->tag_name = $post->tag->name;
+            $post->link = "/post/$post->slug";
+            return $post;
+        });
+    }
+
+    public function getDetailFrontEnd($slug) {
+        $post = $this->findBySlugOrFail($slug);
+        $post->comments = $post->listcommentfront->map(function ($comment) {
+            $comment->author = $comment->user->name;
+            $comment->timeline = $comment->created_at->diffForHumans(Carbon::now());
+            return $comment;
+        })->toArray();
+        $post->author = $post->user->name;
+        $post->asset = $post->asset;
+        $post->tag_name = $post->tag->name;
+        $post->story = json_decode($post->story);
+        return $post;
+    }
+
+    public function getListcomments() {
+        return $this->listcomment->map(function ($comment) {
+            $comment->author = $comment->user->name;
+            $comment->timeline = $comment->created_at->diffForHumans(Carbon::now());
+            return $comment;
+        })->toArray();
     }
 
     public function getListcommentAttribute() {

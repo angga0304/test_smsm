@@ -1,7 +1,7 @@
 <script setup>
 import { Head } from '@inertiajs/vue3'
 import {
-  mdiChartTimelineVariant,
+  mdiDatabaseEdit,
   mdiClockTimeEight
 } from '@mdi/js'
 import SectionMain from '@/Components/SectionMain.vue'
@@ -38,10 +38,10 @@ const submit = () => {
 
 <template>
   <LayoutAuthenticated>
-    <Head title="Dashboard" />
+    <Head title="Update Tag" />
     <SectionMain>
       <SectionTitleLineWithButton
-        :icon="mdiChartTimelineVariant"
+        :icon="mdiDatabaseEdit"
         title="Update Tag"
         main
       >

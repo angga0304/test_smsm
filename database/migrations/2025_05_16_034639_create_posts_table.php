@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('body');
             $table->json('story');
+            $table->dateTime('publish')->nullable();
             $table->unsignedBigInteger('user_id');
             $table->softDeletes();
             $table->timestamps();

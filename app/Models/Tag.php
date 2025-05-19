@@ -31,6 +31,15 @@ class Tag extends Model
         return $this->hasMany(Post::class, 'tag_id');
     }
 
+    public function getOptionData() {
+        return $this->all()->map(function($data) {
+            return [
+                'id' => $data->id,
+                'label' => $data->name,
+            ];
+        });
+    }
+
     public function getActivitiesAttribute() {
         $activities = Activity::where('model', 'tag')
             ->where('uuid', $this->id)

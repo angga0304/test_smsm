@@ -40,7 +40,7 @@ const submit = () => {
     onError: (errors) => {
         if(errors.file_id) {
             showerrors.file = true;
-            fileErrorMsg.value = errors.file;
+            fileErrorMsg.value = errors.file_id;
         } else {
             showerrors.file = false;
         }
@@ -51,7 +51,7 @@ const submit = () => {
 
 <template>
   <LayoutAuthenticated>
-    <Head title="Dashboard" />
+    <Head title="Upload asset" />
     <SectionMain>
       <SectionTitleLineWithButton
         :icon="mdiChartTimelineVariant"
@@ -72,8 +72,8 @@ const submit = () => {
                                 for="body" 
                                 class="block text-gray-700 text-sm font-bold mb-2">
                                 File:</label>
-                                <input type="file" @change="onFileChange" ref="fileInput" /><br>
-                            <span v-if="showerrors.file" class="error text-red-800"> File must be pdf and below 300kb</span>
+                                <input type="file" accept="application/pdf" @change="onFileChange" ref="fileInput" /><br>
+                            <span v-if="showerrors.file" class="error text-red-800"> {{ fileErrorMsg }}</span>
                         </div>
 
                         <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded my-3 text-white">

@@ -30,6 +30,7 @@ const form = useForm({
   tag_id: "",
   active: false,
   file_id: null,
+  publish: null,
 });
 
 const showerrors = reactive({
@@ -38,6 +39,7 @@ const showerrors = reactive({
     'tag_id': false,
     'file_id': false,
     'story': false,
+    'publish': false,
 });
 
 const onFileChange = () => {
@@ -69,6 +71,11 @@ const submit = () => {
         } else {
             showerrors.story = false;
         }
+        if(errors.publish) {
+            showerrors.publish = true;
+        } else {
+            showerrors.publish = false;
+        }
         if(errors.file_id) {
             showerrors.file = true;
             fileErrorMsg.value = errors.file;
@@ -82,7 +89,7 @@ const submit = () => {
 
 <template>
   <LayoutAuthenticated>
-    <Head title="Dashboard" />
+    <Head title="Create Post" />
     <SectionMain>
       <SectionTitleLineWithButton
         :icon="mdiChartTimelineVariant"
@@ -109,8 +116,6 @@ const submit = () => {
                                 id="title"
                                 v-model="form.title" />
                             <span v-if="showerrors.title" class="error text-red-800"> This field required</span>
-
-
                         </div>
 
                         <div class="mb-4">
@@ -137,7 +142,19 @@ const submit = () => {
                             <span v-if="showerrors.story" class="error text-red-800"> This field required</span>
                         </div>
 
-                        
+                        <div class="mb-4">
+                            <label 
+                                for="title" 
+                                class="block text-gray-700 text-sm font-bold mb-2">
+                                Publish:</label>
+                            <input 
+                                type="datetime-local" 
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                                placeholder="Enter Title" 
+                                id="title"
+                                v-model="form.publish" />
+                            <span v-if="showerrors.publish" class="error text-red-800"> This field required</span>
+                        </div>
 
                         <div class="mb-4">
                             <label 
@@ -153,7 +170,7 @@ const submit = () => {
                                 for="body" 
                                 class="block text-gray-700 text-sm font-bold mb-2">
                                 File:</label>
-                                <input type="file" @change="onFileChange" ref="fileInput" /><br>
+                                <input type="file" accept="application/pdf" @change="onFileChange" ref="fileInput" /><br>
                             <span v-if="showerrors.file" class="error text-red-800"> File must be pdf and below 300kb</span>
                         </div>
 

@@ -25,6 +25,7 @@ class UpdatePostRequest extends FormRequest
             'title' => 'required',
             'body' => 'required',
             'story' => 'required',
+            'publish' => 'required',
             'tag_id' => 'required',
         ];
     }

@@ -36,6 +36,16 @@ class File extends Model
         return $this->original_name;
     }
 
+    public function getIndexData() {
+        return $this->all()->map(function ($data) {
+            $data->canDelete = $data->Post->count() < 1;
+            $data->used = $data->Post->count();
+            $data->asset = $data->asset;
+            $data->time = $data->created_at->format("Y/m/d H:i:s");
+            return $data;
+        });
+    }
+
     public function getActivitiesAttribute() {
         $activities = Activity::where('model', 'file')
             ->where('uuid', $this->id)

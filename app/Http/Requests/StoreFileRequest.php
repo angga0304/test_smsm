@@ -22,7 +22,7 @@ class StoreFileRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file_id' => 'required|mimes:pdf|max:2048'
+            'file_id' => 'required|mimes:pdf|min:100|max:500'
         ];
     }
 }
